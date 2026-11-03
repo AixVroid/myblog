@@ -1,0 +1,29 @@
+---
+import { SITE } from '../consts';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p class="site-footer__copy">
+      © {year} {SITE.author} · 由 <a href="https://astro.build" target="_blank" rel="noopener">Astro</a> 驱动
+    </p>
+    <div class="site-footer__links">
+      {SITE.social.map((item) => (
+        <a href={item.href} target="_blank" rel="noopener">{item.label}</a>
+      ))}
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer__copy {
+    margin: 0;
+  }
+
+  .site-footer__copy a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+</style>

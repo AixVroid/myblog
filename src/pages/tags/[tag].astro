@@ -1,0 +1,57 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { byDateDesc, collectTags } from '../../lib/utils';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(byDateDesc);
+  const tags = collectTags(posts);
+
+  return [...tags.keys()].map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts.filter((post) => post.data.tags.includes(tag)),
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout title={`#${tag}`} description={`标签「${tag}」下的全部文章`}>
+  <div class="page">
+    <div class="container">
+      <header class="page__head">
+        <h1 class="page__title">#{tag}</h1>
+        <p class="page__lede">{posts.length} 篇文章 · <a class="back" href={url('/tags')}>全部标签</a></p>
+      </header>
+
+      <ul class="post-grid">
+        {posts.map((post) => (
+          <li>
+            <PostCard post={post} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .post-grid > li {
+    display: flex;
+  }
+
+  .post-grid > li > :global(.card) {
+    width: 100%;
+  }
+
+  .back {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+</style>

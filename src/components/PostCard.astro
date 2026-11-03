@@ -1,0 +1,62 @@
+---
+import { formatDate, hueFromString, readingTime } from '../lib/utils';
+import { url } from '../lib/url';
+import type { CollectionEntry } from 'astro:content';
+
+export interface Props {
+  post: CollectionEntry<'blog'>;
+  featured?: boolean;
+}
+
+const { post, featured = false } = Astro.props;
+const { title, description, pubDate, tags, hue } = post.data;
+const coverHue = hue ?? hueFromString(post.id);
+const minutes = readingTime(post.body ?? '');
+const mark = title.trim().charAt(0);
+---
+
+<article class:list={['card', { 'card--featured': featured }]}>
+  <div class="card__cover" style={`--h:${coverHue}`} aria-hidden="true">
+    <span class="card__cover-mark">{mark}</span>
+  </div>
+
+  <div class="card__body">
+    <div class="card__meta">
+      <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+      {tags.length > 0 && <span class="card__meta-dot" aria-hidden="true">·</span>}
+      {tags.length > 0 && <span>#{tags[0]}</span>}
+    </div>
+
+    <h3 class="card__title">
+      <a class="card__link" href={url(`/blog/${post.id}/`)}>{title}</a>
+    </h3>
+
+    <p class="card__desc">{description}</p>
+
+    <div class="card__foot">
+      <span>{minutes} 分钟阅读</span>
+      <span class="card__arrow" aria-hidden="true">→</span>
+    </div>
+  </div>
+</article>
+
+<style>
+  /* 整张卡片可点击，同时保持内部标签/链接可独立点击 */
+  .card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .card__meta,
+  .card__foot {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .card__meta-dot {
+    opacity: 0.5;
+  }
+</style>

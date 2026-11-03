@@ -1,0 +1,40 @@
+---
+---
+
+<button class="theme-mini" type="button" aria-label="切换深色模式" title="切换深浅色">
+  <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4.2"></circle>
+    <path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"></path>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5a8.6 8.6 0 1 0 10.7 10.7Z"></path>
+  </svg>
+</button>
+
+<script is:inline>
+  (() => {
+    const btn = document.querySelector('.theme-mini');
+    if (!btn) return;
+
+    const sync = () => {
+      const dark = document.documentElement.dataset.theme === 'dark';
+      btn.setAttribute('aria-label', dark ? '切换到浅色模式' : '切换到深色模式');
+      btn.setAttribute('aria-pressed', String(dark));
+    };
+
+    btn.addEventListener('click', () => {
+      const root = document.documentElement;
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch {
+        /* 隐私模式忽略 */
+      }
+      sync();
+      document.dispatchEvent(new CustomEvent('themechange', { detail: next }));
+    });
+
+    sync();
+  })();
+</script>

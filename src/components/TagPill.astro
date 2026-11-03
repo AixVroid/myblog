@@ -1,0 +1,26 @@
+---
+export interface Props {
+  label: string;
+  href: string;
+  count?: number;
+}
+
+const { label, href, count } = Astro.props;
+
+// 每个标签一个稳定的色相
+let hash = 0;
+for (let i = 0; i < label.length; i++) hash = (hash * 31 + label.charCodeAt(i)) % 360;
+const hue = hash;
+---
+
+<a class="tag-pill" href={href} style={`--h:${hue}`}>
+  {label}{count !== undefined && <span class="tag-pill__count">{count}</span>}
+</a>
+
+<style>
+  .tag-pill__count {
+    margin-left: 6px;
+    opacity: 0.65;
+    font-variant-numeric: tabular-nums;
+  }
+</style>

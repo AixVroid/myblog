@@ -1,0 +1,74 @@
+---
+import { GISCUS } from '../consts';
+
+const enabled = GISCUS.enabled && GISCUS.repo && GISCUS.repoId && GISCUS.categoryId;
+---
+
+<section class="comments" aria-labelledby="comments-title">
+  <h2 class="comments__title" id="comments-title">评论</h2>
+
+  {
+    enabled ? (
+      <div
+        class="giscus"
+        data-repo={GISCUS.repo}
+        data-repo-id={GISCUS.repoId}
+        data-category={GISCUS.category}
+        data-category-id={GISCUS.categoryId}
+        data-mapping={GISCUS.mapping}
+        data-strict={GISCUS.strict}
+        data-reactions-enabled={GISCUS.reactionsEnabled}
+        data-input-position={GISCUS.inputPosition}
+        data-lang={GISCUS.lang}
+        data-theme="light"
+        data-loading="lazy"
+      />
+    ) : (
+      <div class="comments__placeholder">
+        <p><strong>评论功能尚未启用。</strong>这里预留了 Giscus 的位置，基于 GitHub Discussions，静态站点也能有评论。</p>
+        <p>开启方式：</p>
+        <ol>
+          <li>新建一个公开仓库，在 Settings → Features 中勾选 Discussions</li>
+          <li>安装 giscus app，并给仓库授权</li>
+          <li>打开 giscus.app 填写仓库，复制 repoId 和 categoryId</li>
+          <li>填入 <code>src/consts.ts</code> 的 <code>GISCUS</code>，把 <code>enabled</code> 改成 true</li>
+        </ol>
+      </div>
+    )
+  }
+</section>
+
+{
+  enabled && (
+    <script is:inline>
+      (() => {
+        const script = document.createElement('script');
+        script.src = 'https://giscus.app/client.js';
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+
+        const el = document.querySelector('.giscus');
+        if (!el) return;
+        for (const [key, value] of Object.entries(el.dataset)) {
+          const name = 'data-' + key.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
+          script.setAttribute(name, value);
+        }
+        if (document.documentElement.dataset.theme === 'dark') {
+          script.setAttribute('data-theme', 'dark_dimmed');
+        }
+        el.replaceWith(script);
+
+        const themes = { light: 'light', dark: 'dark_dimmed' };
+        const apply = (mode) => {
+          const frame = document.querySelector('iframe.giscus-frame');
+          if (!frame) return;
+          frame.contentWindow?.postMessage(
+            { giscus: { setConfig: { theme: themes[mode] || 'light' } } },
+            'https://giscus.app'
+          );
+        };
+        document.addEventListener('themechange', (e) => apply(e.detail));
+      })();
+    </script>
+  )
+}

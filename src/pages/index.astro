@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import IdCard from '../components/IdCard.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout title={SITE.title} description={SITE.description} bareTitle bare>
+  <IdCard />
+</BaseLayout>

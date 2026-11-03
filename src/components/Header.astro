@@ -1,0 +1,28 @@
+---
+import { SITE } from '../consts';
+import ThemeToggle from './ThemeToggle.astro';
+import { url, pathWithoutBase } from '../lib/url';
+
+const pathname = pathWithoutBase(Astro.url.pathname);
+const isActive = (href: string) =>
+  href === '/' ? pathname === '/' : pathname.startsWith(href);
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href={url('/')}>
+      <span class="brand__dot" aria-hidden="true"></span>
+      {SITE.title}
+    </a>
+
+    <nav class="site-nav" aria-label="主导航">
+      {SITE.nav.map((item) => (
+        <a href={url(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <ThemeToggle />
+  </div>
+</header>

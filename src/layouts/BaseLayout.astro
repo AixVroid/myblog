@@ -1,0 +1,76 @@
+---
+import { SITE } from '../consts';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { url } from '../lib/url';
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+  /** article 页面会传进来，用于 OG 类型 */
+  type?: 'website' | 'article';
+  /** 首页标题不拼接站名后缀 */
+  bareTitle?: boolean;
+  /** 只渲染页面内容：不要页头导航和页脚（首页名片页用） */
+  bare?: boolean;
+}
+
+const {
+  title,
+  description = SITE.description,
+  type = 'website',
+  bareTitle = false,
+  bare = false,
+} = Astro.props;
+
+const pageTitle = bareTitle ? title : `${title} · ${SITE.title}`;
+// 域名以 astro.config.mjs 的 site 为准（CI 里自动注入），consts.ts 的 url 只作兜底
+const siteUrl = Astro.site ?? new URL(SITE.url);
+const canonical = new URL(Astro.url.pathname.replace(/\/index\.html$/, '/'), siteUrl).href;
+const ogImage = new URL(url('/og-default.png'), siteUrl).href;
+---
+
+<!doctype html>
+<html lang={SITE.lang} data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
+
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={SITE.title} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="zh_CN" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- 在首屏渲染前确定主题，避免闪白 -->
+    <script is:inline>
+      (() => {
+        try {
+          const saved = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.dataset.theme = saved || (prefersDark ? 'dark' : 'light');
+        } catch {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+  </head>
+
+  <body class:list={[{ 'is-bare': bare }]}>
+    {!bare && <Header />}
+    <main>
+      <slot />
+    </main>
+    {!bare && <Footer />}
+  </body>
+</html>

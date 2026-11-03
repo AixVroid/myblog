@@ -1,0 +1,70 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagPill from '../../components/TagPill.astro';
+import { byDateDesc, collectTags, formatDate, readingTime } from '../../lib/utils';
+import { url } from '../../lib/url';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(byDateDesc);
+const tags = collectTags(posts);
+---
+
+<BaseLayout title="标签" description="按标签浏览全部文章">
+  <div class="page">
+    <div class="container">
+      <header class="page__head">
+        <h1 class="page__title">标签</h1>
+        <p class="page__lede">
+          共 {tags.size} 个标签、{posts.length} 篇文章。标签写在 Markdown 的 frontmatter 里，多个标签用逗号分隔。
+        </p>
+      </header>
+
+      {
+        tags.size === 0 ? (
+          <p class="empty">还没有任何标签。</p>
+        ) : (
+          <ul class="tag-cloud">
+            {[...tags.entries()].map(([tag, count]) => (
+              <li>
+                <TagPill
+                  label={tag}
+                  href={url(`/tags/${encodeURIComponent(tag)}/`)}
+                  count={count}
+                />
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      <section class="section" style="padding-bottom:0">
+        <div class="section__head">
+          <h2 class="section__title">全部文章</h2>
+        </div>
+        <ul class="plain-list">
+          {posts.map((post) => (
+            <li>
+              <a href={url(`/blog/${post.id}/`)}>
+                <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+                <span class="plain-list__title">{post.data.title}</span>
+                <span class="plain-list__spacer"></span>
+                <span class="plain-list__meta">{readingTime(post.body ?? '')} 分钟</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tag-cloud {
+    margin-bottom: 8px;
+  }
+
+  .tag-cloud :global(.tag-pill) {
+    font-size: 0.88rem;
+    padding: 7px 16px;
+  }
+</style>

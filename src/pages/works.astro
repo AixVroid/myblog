@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { url } from '../lib/url';
+
+const projects = [
+  {
+    name: '个人博客',
+    desc: '你正在看的这个站点，Astro 构建的静态博客，含 3D 名片首页。',
+    tags: ['Astro', 'CSS 3D'],
+    href: url('/'),
+  },
+  {
+    name: '占位项目 A',
+    desc: '换成你真正做过的项目：做了什么、解决什么问题、技术栈是什么。',
+    tags: ['待填写'],
+    href: '#',
+  },
+  {
+    name: '占位项目 B',
+    desc: '没有项目也没关系，删掉这个页面，把导航里的「项目」指向别处。',
+    tags: ['待填写'],
+    href: '#',
+  },
+];
+---
+
+<BaseLayout title="项目" description="做过的东西">
+  <div class="page">
+    <div class="container">
+      <header class="page__head">
+        <h1 class="page__title">项目</h1>
+        <p class="page__lede">这里放你做过的东西。内容在 <code>src/pages/works.astro</code> 顶部的数组里改。</p>
+      </header>
+
+      <ul class="project-list">
+        {
+          projects.map((p) => (
+            <li class="project">
+              <a class="project__link" href={p.href}>
+                <div class="project__head">
+                  <h2 class="project__name">{p.name}</h2>
+                  <span class="project__arrow" aria-hidden="true">↗</span>
+                </div>
+                <p class="project__desc">{p.desc}</p>
+                <ul class="project__tags">
+                  {p.tags.map((t) => (
+                    <li>{t}</li>
+                  ))}
+                </ul>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .project-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  }
+
+  .project__link {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    padding: 22px 24px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease;
+  }
+
+  .project__link:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+    border-color: var(--border-strong);
+  }
+
+  .project__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .project__name {
+    font-family: var(--font-serif);
+    font-size: 1.18rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .project__arrow {
+    color: var(--accent);
+  }
+
+  .project__desc {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--fg-muted);
+  }
+
+  .project__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    margin: auto 0 0;
+    padding: 6px 0 0;
+  }
+
+  .project__tags li {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--fg-muted);
+  }
+</style>

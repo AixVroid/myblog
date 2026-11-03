@@ -1,0 +1,98 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagPill from '../../components/TagPill.astro';
+import Giscus from '../../components/Giscus.astro';
+import { byDateDesc, formatDate, readingTime } from '../../lib/utils';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(byDateDesc);
+
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      newer: posts[i - 1] ?? null,
+      older: posts[i + 1] ?? null,
+    },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  newer: CollectionEntry<'blog'> | null;
+  older: CollectionEntry<'blog'> | null;
+}
+
+const { post, newer, older } = Astro.props;
+const { Content } = await render(post);
+const { title, description, pubDate, updatedDate, tags } = post.data;
+const minutes = readingTime(post.body ?? '');
+---
+
+<BaseLayout title={title} description={description} type="article">
+  <article class="article">
+    <div class="container">
+      <header class="article__header">
+        {tags.length > 0 && (
+          <div class="article__tags">
+            {tags.map((tag) => (
+              <TagPill label={tag} href={url(`/tags/${encodeURIComponent(tag)}/`)} />
+            ))}
+          </div>
+        )}
+
+        <h1 class="article__title">{title}</h1>
+        {description && <p class="article__desc">{description}</p>}
+
+        <div class="article__meta">
+          <span>
+            <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+          </span>
+          <span class="dot" aria-hidden="true"></span>
+          <span>{minutes} 分钟阅读</span>
+          {updatedDate && (
+            <>
+              <span class="dot" aria-hidden="true"></span>
+              <span>更新于 {formatDate(updatedDate)}</span>
+            </>
+          )}
+        </div>
+      </header>
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      {(newer || older) && (
+        <nav class="post-nav" aria-label="上下篇导航">
+          {older ? (
+            <a class="post-nav__link" href={url(`/blog/${older.id}/`)}>
+              <span class="post-nav__label">← 更早</span>
+              <span class="post-nav__title">{older.data.title}</span>
+            </a>
+          ) : (
+            <span />
+          )}
+          {newer ? (
+            <a class="post-nav__link post-nav__link--next" href={url(`/blog/${newer.id}/`)}>
+              <span class="post-nav__label">更新 →</span>
+              <span class="post-nav__title">{newer.data.title}</span>
+            </a>
+          ) : (
+            <span />
+          )}
+        </nav>
+      )}
+
+      <Giscus />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .article__meta .dot {
+    display: inline-block;
+  }
+</style>

@@ -1,0 +1,37 @@
+---
+import type { CardLink } from '../data/card';
+import { url } from '../lib/url';
+
+export interface Props {
+  link: CardLink;
+}
+
+const { link } = Astro.props;
+const inert = link.locked || !link.href;
+const href = link.href ? (link.external ? link.href : url(link.href)) : undefined;
+---
+
+{
+  inert ? (
+    <span class="nav-cell is-locked" aria-disabled="true">
+      <span class="nav-cell__en">{link.en}</span>
+      <span class="nav-cell__label">{link.label}</span>
+      <span class="nav-cell__arrow" aria-hidden="true">
+        ·
+      </span>
+    </span>
+  ) : (
+    <a
+      class="nav-cell"
+      href={href}
+      target={link.external ? '_blank' : undefined}
+      rel={link.external ? 'noopener noreferrer' : undefined}
+    >
+      <span class="nav-cell__en">{link.en}</span>
+      <span class="nav-cell__label">{link.label}</span>
+      <span class="nav-cell__arrow" aria-hidden="true">
+        {link.external ? '↗' : '→'}
+      </span>
+    </a>
+  )
+}

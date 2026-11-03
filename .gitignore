@@ -1,0 +1,24 @@
+# 依赖
+node_modules/
+.npm-cache/
+
+# 构建产物
+dist/
+.astro/
+
+# 环境变量
+.env
+.env.*
+!.env.example
+
+# 编辑器
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 本地截图验证脚本
+.preview/
+
+# 本机 npm 配置（缓存路径等），不进仓库
+.npmrc

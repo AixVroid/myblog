@@ -1,0 +1,100 @@
+---
+import { cardData } from '../data/card';
+import CardNav from './CardNav.astro';
+import ThemeToggleMini from './ThemeToggleMini.astro';
+import { url } from '../lib/url';
+import '../styles/id-card.css';
+
+const { avatar, avatarAlt, name, id, links } = cardData;
+---
+
+<div class="card-stage">
+  <div class="stage-inner">
+    <div class="card-wrap">
+      <div class="id-card">
+        <div class="card-body">
+          <ThemeToggleMini />
+
+          <div class="card-top">
+            <div class="card-photo">
+              <img src={url(avatar)} alt={avatarAlt} width="300" height="400" loading="eager" />
+            </div>
+
+            <div class="card-name-col">
+              <div class="name-label">名前 / Name</div>
+              <p class="name-value">{name}</p>
+              <div class="name-sign" aria-hidden="true">
+                <svg viewBox="0 0 100 40" fill="none">
+                  <path
+                    d="M4 30c10-18 18-24 22-16 3 6-6 16-2 20 3 3 11-9 17-14 5-4 7-2 5 3-2 6-1 9 3 7 5-2 9-8 13-9 4-1 4 3 2 6-2 3 0 5 4 4 6-2 11-7 14-11"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <CardNav links={links} />
+
+          <div class="card-strip">
+            <div class="barcode" aria-hidden="true"></div>
+            <span class="card-id">{id}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const stage = document.querySelector<HTMLElement>('.card-stage');
+  const wrap = document.querySelector<HTMLElement>('.card-wrap');
+  const nav = document.querySelector<HTMLElement>('.card-nav');
+
+  if (stage && wrap) {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const coarse = window.matchMedia('(hover: none)').matches;
+    let paused = false;
+
+    const reset = () => {
+      wrap.classList.remove('is-tilting');
+      wrap.style.removeProperty('--rx');
+      wrap.style.removeProperty('--ry');
+    };
+
+    const handle = (e: PointerEvent) => {
+      if (paused) return;
+      const r = stage.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+
+      wrap.classList.add('is-tilting');
+      // 负号：鼠标靠近哪个角，那个角就向下压（远离观察者）
+      wrap.style.setProperty('--rx', `${(-y * 34).toFixed(2)}deg`);
+      wrap.style.setProperty('--ry', `${(x * 48).toFixed(2)}deg`);
+      wrap.style.setProperty('--mx', `${((x + 0.5) * 100).toFixed(1)}%`);
+      wrap.style.setProperty('--my', `${((y + 0.5) * 100).toFixed(1)}%`);
+    };
+
+    if (!reduce && !coarse) {
+      stage.addEventListener('pointermove', handle);
+      stage.addEventListener('pointerleave', reset);
+
+      // 指针移到导航或主题开关上时停止倾斜，方便点击
+      const pausers = [nav, document.querySelector<HTMLElement>('.theme-mini')].filter(
+        (el): el is HTMLElement => el !== null
+      );
+
+      for (const el of pausers) {
+        el.addEventListener('pointerenter', () => {
+          paused = true;
+          reset();
+        });
+        el.addEventListener('pointerleave', () => {
+          paused = false;
+        });
+      }
+    }
+  }
+</script>
