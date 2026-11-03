@@ -33,14 +33,14 @@ export const SITE = {
  *   4. 填到下面，并把 enabled 改成 true
  */
 export const GISCUS = {
-  enabled: false,
-  repo: '',
-  repoId: '',
+  enabled: true,
+  repo: 'AixVroid/myblog',
+  repoId: 'R_kgDOHvnNkw',
   category: 'Announcements',
-  categoryId: '',
+  categoryId: 'DIC_kwDOHvnNK84DKTc9',
   mapping: 'pathname',
   strict: '0',
   reactionsEnabled: '1',
-  inputPosition: 'top',
+  inputPosition: 'bottom',
   lang: 'zh-CN',
 };
